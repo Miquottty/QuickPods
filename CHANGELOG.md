@@ -4,6 +4,8 @@ All notable changes to QuickPods will be documented in this file. The format fol
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-09-23
+
 ### Fixed
 
 - Connecting AirPods and other multi-profile headsets now succeeds on the first click. QuickPods requests reconnection on every audio profile of the device (stereo and Hands-Free), as Windows Settings does, and re-issues the request if nothing has come up after 4 and 8 seconds.
@@ -59,7 +61,8 @@ All notable changes to QuickPods will be documented in this file. The format fol
 
 - Kept device mutation fail-closed and excluded raw device and account identifiers from normal diagnostics.
 
-[Unreleased]: https://github.com/rimtty/QuickPods/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/rimtty/QuickPods/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/rimtty/QuickPods/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/rimtty/QuickPods/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/rimtty/QuickPods/compare/v0.1.1...v1.0.0
 [0.1.1]: https://github.com/rimtty/QuickPods/compare/v0.1.0...v0.1.1

@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Semantic release version (for example 1.0.1)
+        description: Semantic release version (for example 1.0.2)
         required: true
-        default: 1.0.1
+        default: 1.0.2
         type: string
 
 permissions:
