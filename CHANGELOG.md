@@ -4,6 +4,10 @@ All notable changes to QuickPods will be documented in this file. The format fol
 
 ## [Unreleased]
 
+### Fixed
+
+- Connecting AirPods and other multi-profile headsets now succeeds on the first click. QuickPods requests reconnection on every audio profile of the device (stereo and Hands-Free), as Windows Settings does, and re-issues the request if nothing has come up after 4 and 8 seconds.
+
 ## [1.0.1] - 2026-09-07
 
 ### Changed

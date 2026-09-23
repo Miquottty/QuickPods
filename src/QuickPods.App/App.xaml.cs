@@ -663,7 +663,13 @@ public partial class App : WpfApplication, IDisposable
                 bluetoothCatalogPort,
                 bluetoothSelectionStore!);
             bluetoothCatalog.StateChanged += OnBluetoothCatalogStateChanged;
-            bluetoothOperationPort = new WindowsBluetoothDeviceOperationPort(bluetoothCatalogPort);
+            bluetoothOperationPort = new WindowsBluetoothDeviceOperationPort(
+                bluetoothCatalogPort,
+                (eventName, properties) => Log(
+                    QuickPodsLogLevel.Information,
+                    eventName,
+                    "Bluetooth reconnect diagnostics.",
+                    properties));
             defaultOutputOperationPort = new WindowsDefaultOutputOperationPort(bluetoothCatalogPort);
             bluetoothOperations = new BluetoothOperationController(
                 bluetoothCatalog,

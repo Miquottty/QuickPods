@@ -12,16 +12,26 @@ public sealed class WindowsBluetoothDeviceOperationPort : IBluetoothDeviceOperat
     private const int ElementNotFound = unchecked((int)0x80070490);
     private static readonly TimeSpan OperationDeadline = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan DisconnectedStableWindow = TimeSpan.FromSeconds(5);
-    private static readonly TimeSpan ObservationInterval = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan ObservationInterval = TimeSpan.FromMilliseconds(150);
+
+    // A single one-shot reconnect can be consumed by baseband paging (for example AirPods
+    // that are asleep or attached to a phone) without the profile connection completing, and
+    // the Bluetooth stack does not retry it. Re-issue the request while nothing has come up.
+    internal static readonly TimeSpan[] ReconnectRetrySchedule =
+        [TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8)];
 
     private readonly WindowsBluetoothAudioCatalogPort catalog;
     private readonly BluetoothWorkerProcessRunner worker;
     private readonly MtaAudioWorker audioWorker = new();
+    private readonly Action<string, IReadOnlyDictionary<string, object?>>? diagnostics;
     private int disposed;
 
-    public WindowsBluetoothDeviceOperationPort(WindowsBluetoothAudioCatalogPort catalog)
+    public WindowsBluetoothDeviceOperationPort(
+        WindowsBluetoothAudioCatalogPort catalog,
+        Action<string, IReadOnlyDictionary<string, object?>>? diagnostics = null)
     {
         this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+        this.diagnostics = diagnostics;
         string workerPath = Path.Combine(AppContext.BaseDirectory, "QuickPods.BluetoothWorker.exe");
         worker = new BluetoothWorkerProcessRunner(workerPath);
     }
@@ -75,17 +85,40 @@ public sealed class WindowsBluetoothDeviceOperationPort : IBluetoothDeviceOperat
             return Failure(preflight.ConnectionState, BluetoothMutationFailure.OwnershipUnknown);
         }
 
-        BluetoothMutationFailure requestFailure = await RunMutationAsync(
-            target.DeviceKey,
-            reconnectAdapter,
-            BluetoothWorkerOperation.Reconnect,
-            cancellationToken).ConfigureAwait(false);
-        if (requestFailure != BluetoothMutationFailure.None)
+        // Like the Windows Settings "Connect" button, ask every profile of the device
+        // (A2DP and Hands-Free) to reconnect. Only the stereo request decides success.
+        string[] secondaryAdapters = ResolveSecondaryReconnectAdapters(binding, reconnectAdapter);
+        var clock = Stopwatch.StartNew();
+        var pendingRequests = new List<Task<BluetoothMutationFailure>>();
+        try
         {
-            return Failure(preflight.ConnectionState, requestFailure, submitted: true);
-        }
+            Task<BluetoothMutationFailure> primary = StartReconnect(
+                target.DeviceKey,
+                reconnectAdapter,
+                secondaryAdapters,
+                pendingRequests,
+                cancellationToken);
+            BluetoothMutationFailure requestFailure = await primary.ConfigureAwait(false);
+            ReportReconnectRequested(attempt: 1, requestFailure, clock);
+            if (requestFailure != BluetoothMutationFailure.None)
+            {
+                return Failure(preflight.ConnectionState, requestFailure, submitted: true);
+            }
 
-        return await ObserveConnectedAsync(binding).ConfigureAwait(false);
+            return await ObserveConnectedAsync(
+                binding,
+                target.DeviceKey,
+                reconnectAdapter,
+                secondaryAdapters,
+                pendingRequests,
+                clock).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Never leave a reconnect worker running into the next operation (e.g. an
+            // immediate disconnect). Secondary requests do not throw.
+            _ = await Task.WhenAll(pendingRequests).ConfigureAwait(false);
+        }
     }
 
     private async ValueTask<BluetoothDeviceOperationResult> ExecuteDisconnectAsync(
@@ -146,26 +179,102 @@ public sealed class WindowsBluetoothDeviceOperationPort : IBluetoothDeviceOperat
     }
 
     private async Task<BluetoothDeviceOperationResult> ObserveConnectedAsync(
-        WindowsBluetoothDeviceBinding binding)
+        WindowsBluetoothDeviceBinding binding,
+        BluetoothDeviceKey deviceKey,
+        string reconnectAdapter,
+        string[] secondaryAdapters,
+        List<Task<BluetoothMutationFailure>> pendingRequests,
+        Stopwatch clock)
     {
         var stopwatch = Stopwatch.StartNew();
         EndpointObservation latest = EndpointObservation.Unknown;
+        int retries = 0;
         while (stopwatch.Elapsed < OperationDeadline)
         {
             latest = await ObserveOnceAsync(binding).ConfigureAwait(false);
             if (latest.RenderActive)
             {
+                ReportReconnectObserved(BluetoothConnectionState.Connected, retries, clock);
                 return new(
                     BluetoothConnectionState.Connected,
                     RequestSubmitted: true,
                     BluetoothMutationFailure.None);
             }
 
+            if (ShouldRetryReconnect(stopwatch.Elapsed, retries, latest.AllDisconnected) &&
+                pendingRequests.All(request => request.IsCompleted))
+            {
+                retries++;
+                int attempt = retries + 1;
+                Task<BluetoothMutationFailure> retry = StartReconnect(
+                    deviceKey,
+                    reconnectAdapter,
+                    secondaryAdapters,
+                    pendingRequests,
+                    CancellationToken.None);
+                pendingRequests.Add(retry);
+                _ = retry.ContinueWith(
+                    completed => ReportReconnectRequested(attempt, completed.Result, clock),
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnRanToCompletion,
+                    TaskScheduler.Default);
+            }
+
             await Task.Delay(ObservationInterval, CancellationToken.None).ConfigureAwait(false);
         }
 
+        ReportReconnectObserved(latest.ConnectionState, retries, clock);
         return Failure(latest.ConnectionState, BluetoothMutationFailure.TimedOut, submitted: true);
     }
+
+    internal static bool ShouldRetryReconnect(TimeSpan elapsed, int retriesUsed, bool allDisconnected) =>
+        allDisconnected &&
+        retriesUsed < ReconnectRetrySchedule.Length &&
+        elapsed >= ReconnectRetrySchedule[retriesUsed];
+
+    private Task<BluetoothMutationFailure> StartReconnect(
+        BluetoothDeviceKey deviceKey,
+        string reconnectAdapter,
+        string[] secondaryAdapters,
+        List<Task<BluetoothMutationFailure>> pendingRequests,
+        CancellationToken cancellationToken)
+    {
+        Task<BluetoothMutationFailure> primary = RunMutationAsync(
+            deviceKey,
+            reconnectAdapter,
+            BluetoothWorkerOperation.Reconnect,
+            cancellationToken);
+        foreach (string adapter in secondaryAdapters)
+        {
+            pendingRequests.Add(RunMutationAsync(
+                deviceKey,
+                adapter,
+                BluetoothWorkerOperation.Reconnect,
+                CancellationToken.None));
+        }
+
+        return primary;
+    }
+
+    private void ReportReconnectRequested(int attempt, BluetoothMutationFailure failure, Stopwatch clock) =>
+        diagnostics?.Invoke(
+            "BluetoothReconnectRequested",
+            new Dictionary<string, object?>
+            {
+                ["Attempt"] = attempt,
+                ["Failure"] = failure.ToString(),
+                ["ElapsedMs"] = clock.ElapsedMilliseconds,
+            });
+
+    private void ReportReconnectObserved(BluetoothConnectionState state, int retries, Stopwatch clock) =>
+        diagnostics?.Invoke(
+            "BluetoothReconnectObserved",
+            new Dictionary<string, object?>
+            {
+                ["ConnectionState"] = state.ToString(),
+                ["Retries"] = retries,
+                ["ElapsedMs"] = clock.ElapsedMilliseconds,
+            });
 
     private async Task<BluetoothDeviceOperationResult> ObserveDisconnectedAsync(
         WindowsBluetoothDeviceBinding binding)
@@ -297,7 +406,7 @@ public sealed class WindowsBluetoothDeviceOperationPort : IBluetoothDeviceOperat
         };
     }
 
-    private static string? ResolveReconnectAdapter(WindowsBluetoothDeviceBinding binding)
+    internal static string? ResolveReconnectAdapter(WindowsBluetoothDeviceBinding binding)
     {
         string[] candidates = [.. binding.Endpoints
             .Where(endpoint =>
@@ -307,6 +416,12 @@ public sealed class WindowsBluetoothDeviceOperationPort : IBluetoothDeviceOperat
             .Distinct(StringComparer.Ordinal)];
         return candidates.Length == 1 ? candidates[0] : null;
     }
+
+    internal static string[] ResolveSecondaryReconnectAdapters(
+        WindowsBluetoothDeviceBinding binding,
+        string reconnectAdapter) =>
+        [.. ResolveDisconnectAdapters(binding)
+            .Where(adapter => !string.Equals(adapter, reconnectAdapter, StringComparison.Ordinal))];
 
     private static string[] ResolveDisconnectAdapters(WindowsBluetoothDeviceBinding binding) =>
         [.. binding.Endpoints
