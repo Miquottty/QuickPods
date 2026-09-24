@@ -4,7 +4,7 @@ Thank you for helping improve QuickPods. Contributions are welcome when they kee
 
 ## Before you start
 
-- Search existing [issues](https://github.com/rimtty/QuickPods/issues) and pull requests.
+- Search existing [issues](https://github.com/Miquottty/QuickPods/issues) and pull requests.
 - Open a focused issue before a substantial behavior, architecture, dependency, installer, or Windows-interop change.
 - Use a short-lived branch created from the latest `main`.
 - Do not attach credentials, raw Bluetooth addresses, full Container/PnP/Endpoint IDs, account names, or unsanitized logs and screenshots.
@@ -14,7 +14,7 @@ Thank you for helping improve QuickPods. Contributions are welcome when they kee
 QuickPods requires Windows 11 x64 and the SDK feature band pinned by [`global.json`](global.json). Visual Studio 2022 with the .NET desktop development workload is optional.
 
 ```powershell
-git clone https://github.com/rimtty/QuickPods.git
+git clone https://github.com/Miquottty/QuickPods.git
 Set-Location QuickPods
 dotnet restore QuickPods.sln --locked-mode
 dotnet build QuickPods.sln -c Release --no-restore

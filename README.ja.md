@@ -42,7 +42,7 @@
 
 ## インストールと起動
 
-1. [最新のRelease](https://github.com/rimtty/QuickPods/releases/latest)から`QuickPods-<version>-win-x64.zip`と`SHA256SUMS.txt`をダウンロードします。
+1. [最新のRelease](https://github.com/Miquottty/QuickPods/releases/latest)から`QuickPods-<version>-win-x64.zip`と`SHA256SUMS.txt`をダウンロードします。
 2. ZIPのSHA-256チェックサムが`SHA256SUMS.txt`と一致することを確認します。
 3. ZIP内の`QuickPods`フォルダー全体を、自分のWindowsユーザーが所有する固定の場所へ展開します。
 4. そのフォルダーの直下にある`QuickPods.exe`を起動します。

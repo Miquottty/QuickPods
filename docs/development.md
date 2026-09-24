@@ -13,7 +13,7 @@ QuickPods is Windows-specific. WPF, Win32, shell hooks and window event hooks, C
 ## Clone and restore
 
 ```powershell
-git clone https://github.com/rimtty/QuickPods.git
+git clone https://github.com/Miquottty/QuickPods.git
 Set-Location QuickPods
 dotnet restore QuickPods.sln --locked-mode
 dotnet restore installer/QuickPods.Setup/QuickPods.Setup.wixproj --locked-mode

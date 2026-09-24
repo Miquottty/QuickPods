@@ -41,7 +41,7 @@ public sealed class ApplicationUpdatePolicyTests
         {
             LastUpdateCheckUtc = Now,
             LastKnownLatestVersion = "0.2.0",
-            LastKnownReleasePage = "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0",
+            LastKnownReleasePage = "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0",
         };
 
         ApplicationUpdateCheckResult result = Assert.IsType<ApplicationUpdateCheckResult>(
@@ -50,5 +50,18 @@ public sealed class ApplicationUpdatePolicyTests
         Assert.Null(ApplicationUpdatePolicy.TryCreateCachedResult(
             valid with { LastKnownReleasePage = "https://example.com/release" },
             new Version(0, 1, 2)));
+    }
+
+    [Fact]
+    public void CachedReleasePageFromThePreviousOwnerIsDiscarded()
+    {
+        QuickPodsSettings settings = QuickPodsSettings.Default with
+        {
+            LastUpdateCheckUtc = Now,
+            LastKnownLatestVersion = "1.0.2",
+            LastKnownReleasePage = "https://github.com/rimtty/QuickPods/releases/tag/v1.0.2",
+        };
+
+        Assert.Null(ApplicationUpdatePolicy.TryCreateCachedResult(settings, new Version(1, 0, 2)));
     }
 }

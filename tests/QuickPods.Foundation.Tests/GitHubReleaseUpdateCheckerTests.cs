@@ -24,7 +24,7 @@ public sealed class GitHubReleaseUpdateCheckerTests
             apiVersion = request.Headers.GetValues("X-GitHub-Api-Version").Single();
             return CreateJsonResponse(
                 "v0.2.0",
-                "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0");
+                "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0");
         }));
         var checker = new GitHubReleaseUpdateChecker(client);
 
@@ -34,10 +34,10 @@ public sealed class GitHubReleaseUpdateCheckerTests
         Assert.Equal(new Version(0, 1, 2), result.CurrentVersion);
         Assert.Equal(new Version(0, 2, 0), result.LatestVersion);
         Assert.Equal(
-            "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0",
+            "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0",
             result.ReleasePage.AbsoluteUri);
         Assert.Equal(
-            "https://api.github.com/repos/rimtty/QuickPods/releases/latest",
+            "https://api.github.com/repos/Miquottty/QuickPods/releases/latest",
             requestUri);
         Assert.Equal("application/vnd.github+json", accept);
         Assert.Equal("QuickPods/0.1.2", userAgent);
@@ -49,7 +49,7 @@ public sealed class GitHubReleaseUpdateCheckerTests
     {
         using var client = new HttpClient(new StubHttpMessageHandler(_ => CreateJsonResponse(
             "v0.1.2",
-            "https://github.com/rimtty/QuickPods/releases/tag/v0.1.2")));
+            "https://github.com/Miquottty/QuickPods/releases/tag/v0.1.2")));
         var checker = new GitHubReleaseUpdateChecker(client);
 
         var result = await checker.CheckAsync(new Version(0, 1, 2, 0));
@@ -59,9 +59,11 @@ public sealed class GitHubReleaseUpdateCheckerTests
     }
 
     [Theory]
-    [InlineData("0.2", "https://github.com/rimtty/QuickPods/releases/tag/v0.2")]
-    [InlineData("v0.2.0", "https://example.com/rimtty/QuickPods/releases/tag/v0.2.0")]
-    [InlineData("v0.2.0", "http://github.com/rimtty/QuickPods/releases/tag/v0.2.0")]
+    [InlineData("0.2", "https://github.com/Miquottty/QuickPods/releases/tag/v0.2")]
+    [InlineData("v0.2.0", "https://example.com/Miquottty/QuickPods/releases/tag/v0.2.0")]
+    [InlineData("v0.2.0", "http://github.com/Miquottty/QuickPods/releases/tag/v0.2.0")]
+    [InlineData("v0.2.0", "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0")]
+    [InlineData("v0.2.0", "https://github.com/Miquottty/QuickPodsFork/releases/tag/v0.2.0")]
     public async Task InvalidReleaseMetadataIsRejected(string tag, string releasePage)
     {
         using var client = new HttpClient(new StubHttpMessageHandler(_ =>
@@ -78,7 +80,7 @@ public sealed class GitHubReleaseUpdateCheckerTests
         using var client = new HttpClient(new StubHttpMessageHandler(_ =>
             CreateJsonResponse(
                 "v0.2.0",
-                "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0",
+                "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0",
                 prerelease: true)));
         var checker = new GitHubReleaseUpdateChecker(client);
 

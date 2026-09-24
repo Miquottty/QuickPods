@@ -8,10 +8,8 @@ namespace QuickPods.Infrastructure.Updates;
 
 public sealed class GitHubReleaseUpdateChecker : IApplicationUpdateChecker
 {
-    internal static readonly Uri LatestReleaseEndpoint = new(
-        "https://api.github.com/repos/rimtty/QuickPods/releases/latest");
+    internal static readonly Uri LatestReleaseEndpoint = QuickPodsRepository.LatestReleaseApi;
     private const string GitHubApiVersion = "2026-03-10";
-    private const string ReleasePathPrefix = "/rimtty/QuickPods/releases/";
 
     private readonly HttpClient httpClient;
 
@@ -60,11 +58,7 @@ public sealed class GitHubReleaseUpdateChecker : IApplicationUpdateChecker
         }
 
         if (!Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out Uri? releasePage) ||
-            releasePage.Scheme != Uri.UriSchemeHttps ||
-            !string.Equals(releasePage.Host, "github.com", StringComparison.OrdinalIgnoreCase) ||
-            !releasePage.AbsolutePath.StartsWith(
-                ReleasePathPrefix,
-                StringComparison.OrdinalIgnoreCase))
+            !QuickPodsRepository.IsReleasePage(releasePage))
         {
             throw new InvalidDataException("The latest QuickPods release URL is invalid.");
         }
