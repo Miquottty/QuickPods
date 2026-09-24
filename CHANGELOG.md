@@ -4,6 +4,8 @@ All notable changes to QuickPods will be documented in this file. The format fol
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-09-24
+
 ### Fixed
 
 - Update checks work again after the repository moved to `Miquottty/QuickPods`. The release endpoint, the accepted release-page path, and every project link now use the new location, and a cached release page from the previous location is discarded.
@@ -65,7 +67,8 @@ All notable changes to QuickPods will be documented in this file. The format fol
 
 - Kept device mutation fail-closed and excluded raw device and account identifiers from normal diagnostics.
 
-[Unreleased]: https://github.com/Miquottty/QuickPods/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/Miquottty/QuickPods/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/Miquottty/QuickPods/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Miquottty/QuickPods/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Miquottty/QuickPods/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Miquottty/QuickPods/compare/v0.1.1...v1.0.0

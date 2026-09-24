@@ -90,14 +90,14 @@ jobs:
         run: >-
           ./build/Publish-ReleaseCandidate.ps1
           -OutputDirectory artifacts/rc
-          -Version 1.0.2-ci.${{ github.run_number }}
+          -Version 1.0.3-ci.${{ github.run_number }}
 
       - name: Publish per-user MSI
         if: ${{ github.event_name != 'pull_request' }}
         run: >-
           ./build/Publish-Installer.ps1
           -OutputDirectory artifacts/installer
-          -Version 1.0.2-ci.${{ github.run_number }}
+          -Version 1.0.3-ci.${{ github.run_number }}
           -PayloadDirectory artifacts/rc/QuickPods
           -SkipPayloadPublish
           -SkipRestore
