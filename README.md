@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rimtty/QuickPods/actions/workflows/ci.yml"><img src="https://github.com/rimtty/QuickPods/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/Miquottty/QuickPods/actions/workflows/ci.yml"><img src="https://github.com/Miquottty/QuickPods/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2011-0078D4" alt="Windows 11">
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4" alt=".NET 10">
@@ -49,7 +49,7 @@ The verified position immediately left of the notification area remains the defa
 
 ## Install and run
 
-1. Download `QuickPods-<version>-win-x64.zip` and `SHA256SUMS.txt` from the [latest release](https://github.com/rimtty/QuickPods/releases/latest).
+1. Download `QuickPods-<version>-win-x64.zip` and `SHA256SUMS.txt` from the [latest release](https://github.com/Miquottty/QuickPods/releases/latest).
 2. Verify the ZIP's SHA-256 checksum against `SHA256SUMS.txt`.
 3. Extract the complete `QuickPods` folder to a permanent location owned by your Windows user.
 4. Run the `QuickPods.exe` located directly in that folder.
@@ -96,7 +96,7 @@ See [Development](docs/development.md) for Visual Studio, hardware-dependent val
 
 QuickPods currently targets Windows 11 x64 and distributes an unsigned portable ZIP while a sustainable code-signing option is evaluated. Review the [known limitations](docs/release/known-limitations.md) before filing a defect.
 
-- Use [GitHub Issues](https://github.com/rimtty/QuickPods/issues) for reproducible bugs and focused feature requests.
+- Use [GitHub Issues](https://github.com/Miquottty/QuickPods/issues) for reproducible bugs and focused feature requests.
 - Read [SUPPORT.md](SUPPORT.md) for support expectations.
 - Report security issues privately according to [SECURITY.md](SECURITY.md).
 - See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.

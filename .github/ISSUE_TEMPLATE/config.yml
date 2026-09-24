@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/rimtty/QuickPods/security/advisories/new
+    url: https://github.com/Miquottty/QuickPods/security/advisories/new
     about: Report security vulnerabilities privately instead of opening a public issue.
   - name: Support and troubleshooting
-    url: https://github.com/rimtty/QuickPods/blob/main/SUPPORT.md
+    url: https://github.com/Miquottty/QuickPods/blob/main/SUPPORT.md
     about: Review support boundaries and troubleshooting resources before opening an issue.

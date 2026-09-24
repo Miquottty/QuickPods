@@ -32,5 +32,5 @@ new release. Keep the same location if start at sign-in is enabled.
 QuickPodsを終了し、このQuickPodsフォルダー全体を新しいリリースのものに置き換えて
 ください。ログイン時の自動起動を有効にしている場合は、同じ場所を使用してください。
 
-Project: https://github.com/rimtty/QuickPods
+Project: https://github.com/Miquottty/QuickPods
 License: MIT (see licenses/LICENSE)

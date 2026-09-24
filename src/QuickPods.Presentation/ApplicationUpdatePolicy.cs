@@ -30,11 +30,7 @@ public static class ApplicationUpdatePolicy
         if (settings.LastUpdateCheckUtc is not { } checkedAt ||
             !Version.TryParse(settings.LastKnownLatestVersion, out Version? latestVersion) ||
             !Uri.TryCreate(settings.LastKnownReleasePage, UriKind.Absolute, out Uri? releasePage) ||
-            releasePage.Scheme != Uri.UriSchemeHttps ||
-            !string.Equals(releasePage.Host, "github.com", StringComparison.OrdinalIgnoreCase) ||
-            !releasePage.AbsolutePath.StartsWith(
-                "/rimtty/QuickPods/releases/",
-                StringComparison.OrdinalIgnoreCase))
+            !QuickPodsRepository.IsReleasePage(releasePage))
         {
             return null;
         }

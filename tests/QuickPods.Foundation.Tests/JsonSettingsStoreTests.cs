@@ -68,7 +68,7 @@ public sealed class JsonSettingsStoreTests
                 CheckForUpdatesAtStartup: true,
                 LastUpdateCheckUtc: new DateTimeOffset(2026, 8, 8, 6, 30, 0, TimeSpan.Zero),
                 LastKnownLatestVersion: "0.2.0",
-                LastKnownReleasePage: "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0");
+                LastKnownReleasePage: "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0");
 
             await store.SaveAsync(expected);
             QuickPodsSettings? actual = await store.LoadAsync();
@@ -160,7 +160,7 @@ public sealed class JsonSettingsStoreTests
                 CheckForUpdatesAtStartup: true,
                 LastUpdateCheckUtc: new DateTimeOffset(2026, 8, 8, 6, 30, 0, TimeSpan.Zero),
                 LastKnownLatestVersion: "0.2.0",
-                LastKnownReleasePage: "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0"));
+                LastKnownReleasePage: "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0"));
             using var selection = new JsonBluetoothSelectionStore(settings);
 
             await selection.SaveAsync(new BluetoothDeviceKey("bt-device"));
@@ -186,7 +186,7 @@ public sealed class JsonSettingsStoreTests
                 actual.LastUpdateCheckUtc);
             Assert.Equal("0.2.0", actual.LastKnownLatestVersion);
             Assert.Equal(
-                "https://github.com/rimtty/QuickPods/releases/tag/v0.2.0",
+                "https://github.com/Miquottty/QuickPods/releases/tag/v0.2.0",
                 actual.LastKnownReleasePage);
         }
         finally
